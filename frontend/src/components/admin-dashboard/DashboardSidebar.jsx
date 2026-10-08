@@ -22,17 +22,17 @@ const groups = [
     items: [
       { label: 'Projects', icon: Building2, id: 'projects', to: '/admin/projects' },
       { label: 'Inspections', icon: ClipboardCheck, id: 'inspections', to: '/admin/inspections' },
-      { label: 'Risk Analysis', icon: Activity, id: 'risk-analysis' },
+      { label: 'Risk Analysis', icon: Activity, id: 'risk-analysis', to: '/admin/risk-analysis' },
     ],
   },
   {
     label: 'Reports',
-    items: [{ label: 'Inspection Reports', icon: FileBarChart, id: 'recent-inspections' }],
+    items: [{ label: 'Inspection Reports', icon: FileBarChart, id: 'recent-inspections', to: '/admin/reports' }],
   },
   {
     label: 'System',
     items: [
-      { label: 'Alerts', icon: Bell, id: 'recent-alerts' },
+      { label: 'Alerts', icon: Bell, id: 'recent-alerts', to: '/admin/alerts' },
       { label: 'Settings', icon: Settings, id: 'settings' },
     ],
   },

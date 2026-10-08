@@ -11,7 +11,7 @@ function RiskDistributionChart({ distribution }) {
   const total = data.reduce((sum, item) => sum + item.value, 0);
 
   return (
-    <section id="risk-analysis" className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5" aria-labelledby="risk-heading">
+    <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5" aria-labelledby="risk-heading">
       <div>
         <h2 id="risk-heading" className="font-heading text-base font-semibold text-slate-900">Risk Distribution</h2>
         <p className="mt-1 text-xs text-slate-500">Current project risk levels</p>

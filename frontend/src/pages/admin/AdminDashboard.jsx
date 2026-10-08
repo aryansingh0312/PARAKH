@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
+import { Component, lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { AlertTriangle, Building2, CheckCircle2, ClipboardCheck, Plus, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import DashboardSidebar from '../../components/admin-dashboard/DashboardSidebar';
@@ -22,7 +22,30 @@ const statCards = [
   { key: 'highRiskProjects', label: 'High Risk Projects', icon: AlertTriangle, tone: 'red' },
 ];
 
-function AdminDashboard() {
+class DashboardChartErrorBoundary extends Component {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div role="alert" className="flex h-80 flex-col items-center justify-center gap-3 rounded-xl border border-amber-200 bg-amber-50 p-5 text-center text-sm text-amber-900">
+          <p>Dashboard charts could not be loaded.</p>
+          <button type="button" onClick={() => window.location.reload()} className="rounded-lg border border-amber-300 bg-white px-3 py-2 font-semibold hover:bg-amber-100">
+            Reload dashboard
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+function AdminDashboard({ initialSection = 'overview' }) {
   const navigate = useNavigate();
   const { user, token, logout } = useAuth();
   const [dashboard, setDashboard] = useState(null);
@@ -30,7 +53,7 @@ function AdminDashboard() {
   const [hasError, setHasError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeId, setActiveId] = useState('overview');
+  const [activeId, setActiveId] = useState(initialSection);
   const [notice, setNotice] = useState('');
 
   useEffect(() => {
@@ -47,6 +70,12 @@ function AdminDashboard() {
 
     return () => controller.abort();
   }, [token, retryCount]);
+
+  useEffect(() => {
+    if (initialSection !== 'overview' && !loading && dashboard) {
+      document.getElementById(initialSection)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [dashboard, initialSection, loading]);
 
   const handleLogout = async () => {
     await logout();
@@ -143,13 +172,17 @@ function AdminDashboard() {
                 ))}
               </section>
 
-              <section aria-label="Inspection and risk analytics" className="grid gap-4 xl:grid-cols-[1.55fr_1fr]">
-                <Suspense fallback={<div className="h-80 animate-pulse rounded-xl border border-slate-200 bg-white" />}>
-                  <InspectionActivityChart data={dashboard.inspectionActivity} />
-                </Suspense>
-                <Suspense fallback={<div className="h-80 animate-pulse rounded-xl border border-slate-200 bg-white" />}>
-                  <RiskDistributionChart distribution={dashboard.riskDistribution} />
-                </Suspense>
+              <section id="risk-analysis" aria-label="Inspection and risk analytics" className="scroll-mt-24 grid gap-4 xl:grid-cols-[1.55fr_1fr]">
+                <DashboardChartErrorBoundary>
+                  <Suspense fallback={<div className="h-80 animate-pulse rounded-xl border border-slate-200 bg-white" />}>
+                    <InspectionActivityChart data={dashboard.inspectionActivity} />
+                  </Suspense>
+                </DashboardChartErrorBoundary>
+                <DashboardChartErrorBoundary>
+                  <Suspense fallback={<div className="h-80 animate-pulse rounded-xl border border-slate-200 bg-white" />}>
+                    <RiskDistributionChart distribution={dashboard.riskDistribution} />
+                  </Suspense>
+                </DashboardChartErrorBoundary>
               </section>
 
               <ProjectLocations locations={dashboard.projectLocations} onViewMap={() => setNotice('Full map view is not included in this dashboard MVP.')} />

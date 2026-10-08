@@ -16,6 +16,17 @@ import AdminInspectionDetailsPage from './pages/admin/AdminInspectionDetailsPage
 import InspectorInspectionsPage from './pages/inspector/InspectorInspectionsPage';
 import InspectorInspectionDetailsPage from './pages/inspector/InspectorInspectionDetailsPage';
 
+function getDashboardPath(role) {
+  const dashboardPaths = {
+    admin: '/admin/dashboard',
+    inspector: '/inspector/dashboard',
+    pmu: '/pmu/dashboard',
+    ngo: '/ngo/dashboard',
+  };
+
+  return dashboardPaths[role] || '/';
+}
+
 function ProtectedRoute({ children, allowedRoles = [] }) {
   const { isAuthenticated, user, loading } = useAuth();
 
@@ -32,7 +43,7 @@ function ProtectedRoute({ children, allowedRoles = [] }) {
   }
 
   if (allowedRoles.length > 0 && !allowedRoles.includes(user?.role)) {
-    return <Navigate to={user?.role === 'admin' ? '/admin/dashboard' : '/inspector/dashboard'} replace />;
+    return <Navigate to={getDashboardPath(user?.role)} replace />;
   }
 
   return children;
@@ -50,19 +61,7 @@ function LoginRoute() {
   }
 
   if (isAuthenticated) {
-    if (user?.role === 'admin') {
-      return <Navigate to="/admin/dashboard" replace />;
-    }
-
-    if (user?.role === 'inspector') {
-      return <Navigate to="/inspector/dashboard" replace />;
-    }
-
-    if (user?.role === 'pmu') {
-      return <Navigate to="/pmu/dashboard" replace />;
-    }
-
-    return <Navigate to="/ngo/dashboard" replace />;
+    return <Navigate to={getDashboardPath(user?.role)} replace />;
   }
 
   return <Login />;
@@ -79,7 +78,34 @@ function App() {
           path="/admin/dashboard"
           element={
             <ProtectedRoute allowedRoles={['admin']}>
-              <AdminDashboard />
+              <AdminDashboard key="overview" />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/risk-analysis"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminDashboard key="risk-analysis" initialSection="risk-analysis" />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/reports"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminDashboard key="recent-inspections" initialSection="recent-inspections" />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/alerts"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminDashboard key="recent-alerts" initialSection="recent-alerts" />
             </ProtectedRoute>
           }
         />
